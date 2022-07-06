@@ -23,7 +23,7 @@ from nasbench import api
 
 # Replace this string with the path to the downloaded nasbench.tfrecord before
 # executing.
-NASBENCH_TFRECORD = '/path/to/nasbench.tfrecord'
+NASBENCH_TFRECORD = 'dataset/nasbench_full.tfrecord'
 
 INPUT = 'input'
 OUTPUT = 'output'

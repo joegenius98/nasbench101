@@ -93,6 +93,7 @@ import json
 import os
 import random
 import time
+from tqdm import tqdm
 
 from nasbench.lib import config
 from nasbench.lib import evaluate
@@ -100,6 +101,8 @@ from nasbench.lib import model_metrics_pb2
 from nasbench.lib import model_spec as _model_spec
 import numpy as np
 import tensorflow as tf
+
+# tf.debugging.set_log_device_placement(True)
 
 # Bring ModelSpec to top-level for convenience. See lib/model_spec.py.
 ModelSpec = _model_spec.ModelSpec
@@ -143,10 +146,21 @@ class NASBench(object):
     # {108} for the smaller dataset with only the 108 epochs.
     self.valid_epochs = set()
 
-    for serialized_row in tf.python_io.tf_record_iterator(dataset_file):
+    def convert_to_utf_8(t: np.ndarray):
+      return t.decode('utf-8')
+
+    # fastest iterator
+    for serialized_row in tqdm(tf.compat.v1.io.tf_record_iterator(dataset_file), total=5083488):
+    # second-fastest iterator
+    # for serialized_row in tqdm(tf.data.TFRecordDataset(dataset_file).as_numpy_iterator(), total=5083488):
+    # slowest iterator
+    # for serialized_row in tqdm(tf.data.TFRecordDataset(dataset_file).map(
+    #   lambda x: tf.numpy_function(func=convert_to_utf_8, inp=[x], Tout=tf.string)), total=5083488):
       # Parse the data from the data file.
       module_hash, epochs, raw_adjacency, raw_operations, raw_metrics = (
-          json.loads(serialized_row.decode('utf-8')))
+        json.loads(serialized_row.decode('utf-8')))
+        # json.loads(serialized_row)) # for both the fastest and second-fastest iterator
+          # json.loads(serialized_row.numpy())) # for the slowest iterator
 
       dim = int(np.sqrt(len(raw_adjacency)))
       adjacency = np.array([int(e) for e in list(raw_adjacency)], dtype=np.int8)

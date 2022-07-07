@@ -1,4 +1,5 @@
 venv/
 nasbench.egg-info/
 *.pyc
-*.tfrecord
+*.tfrecord*
+cifar-10-batches-py

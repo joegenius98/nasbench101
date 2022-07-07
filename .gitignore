@@ -3,3 +3,4 @@ nasbench.egg-info/
 *.pyc
 *.tfrecord*
 cifar-10-batches-py
+batches.meta

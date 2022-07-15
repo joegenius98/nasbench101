@@ -44,7 +44,7 @@ def train_and_evaluate(spec, config, model_dir):
 
   This method trains and evaluates the model for the creation of the benchmark
   dataset. The default values from the config.py are exactly the values used.
-
+app.run(
   Args:
     spec: ModelSpec object.
     config: config dict generated from config.py.
@@ -110,10 +110,10 @@ class _TrainAndEvaluator(object):
     while True:
       # Delete everything in the model dir at the start of each attempt
       try:
-        tf.gfile.DeleteRecursively(self.model_dir)
+        tf.compat.v1.gfile.DeleteRecursively(self.model_dir)
       except tf.errors.NotFoundError:
         pass
-      tf.gfile.MakeDirs(self.model_dir)
+      tf.io.gfile.makedirs(self.model_dir)
 
       try:
         # Train
@@ -122,9 +122,11 @@ class _TrainAndEvaluator(object):
         else:
           timing = training_time.limit(None)
 
-        evaluations = map(float, self.config['intermediate_evaluations'])
+        evaluations = list(map(float, self.config['intermediate_evaluations']))
+
         if not evaluations or evaluations[-1] != 1.0:
           evaluations.append(1.0)
+
         assert evaluations == sorted(evaluations)
 
         evaluation_results = []
@@ -260,11 +262,11 @@ def _create_estimator(spec, config, model_dir,
   # Estimator will save a checkpoint at the end of every train() call. Disable
   # automatic checkpoints by setting the time interval between checkpoints to
   # a very large value.
-  run_config = tf.contrib.tpu.RunConfig(
+  run_config = tf.compat.v1.estimator.tpu.RunConfig(
       model_dir=model_dir,
       keep_checkpoint_max=3,    # Keeps ckpt at start, halfway, and end
       save_checkpoints_secs=2**30,
-      tpu_config=tf.contrib.tpu.TPUConfig(
+      tpu_config=tf.compat.v1.estimator.tpu.TPUConfig(
           iterations_per_loop=config['tpu_iterations_per_loop'],
           num_shards=config['tpu_num_shards']))
 
@@ -274,7 +276,7 @@ def _create_estimator(spec, config, model_dir,
   if num_sample_images and config['use_tpu']:
     num_sample_images *= config['tpu_num_shards']
 
-  estimator = tf.contrib.tpu.TPUEstimator(
+  estimator = tf.compat.v1.estimator.tpu.TPUEstimator(
       use_tpu=config['use_tpu'],
       model_fn=model_builder.build_model_fn(
           spec, config, num_train_images),

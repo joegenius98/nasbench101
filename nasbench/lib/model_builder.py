@@ -54,7 +54,7 @@ def build_model_fn(spec, config, num_train_images):
     aux_activations = []
 
     # Initial stem convolution
-    with tf.variable_scope('stem'):
+    with tf.compat.v1.variable_scope('stem'):
       net = base_ops.conv_bn_relu(
           features, 3, config['stem_filter_size'],
           is_training, config['data_format'])

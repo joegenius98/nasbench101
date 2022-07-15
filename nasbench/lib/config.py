@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl import flags
+from absl import app
 
 FLAGS = flags.FLAGS
 
@@ -106,10 +107,17 @@ flags.DEFINE_integer(
 
 
 def build_config():
-  """Build config from flags defined in this module."""
+  print(FLAGS.flags_by_module_dict().keys())
   config = {
       flag.name: flag.value
       for flag in FLAGS.flags_by_module_dict()[__name__]
   }
 
   return config
+
+def main(argv):
+    print(argv)
+    print(build_config())
+
+if __name__ == "__main__":
+    app.run(main)

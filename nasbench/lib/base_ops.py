@@ -38,26 +38,30 @@ def conv_bn_relu(inputs, conv_size, conv_filters, is_training, data_format):
   else:
     raise ValueError('invalid data_format')
 
-  net = tf.layers.conv2d(
-      inputs=inputs,
+  # print("MAKING THIS REALLY OBVIOUS!")
+  # print(inputs)
+
+  net = tf.keras.layers.Conv2D(
+      # inputs=inputs,
       filters=conv_filters,
       kernel_size=conv_size,
       strides=(1, 1),
       use_bias=False,
-      kernel_initializer=tf.variance_scaling_initializer(),
+      kernel_initializer=tf.keras.initializers.VarianceScaling(),
       padding='same',
       data_format=data_format)
 
-  net = tf.layers.batch_normalization(
-      inputs=net,
+  net = tf.keras.layers.BatchNormalization(
+      # inputs=net,
       axis=axis,
       momentum=BN_MOMENTUM,
       epsilon=BN_EPSILON,
-      training=is_training)
+      training=is_training)(net)
 
-  net = tf.nn.relu(net)
+  output = tf.nn.relu(net)
 
-  return net
+
+  return tf.keras.Model(inputs=inputs, outputs=output)
 
 
 class BaseOp(object):
